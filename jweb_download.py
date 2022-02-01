@@ -3,6 +3,7 @@ import urllib.request
 from bs4 import BeautifulSoup
 import time
 import os
+import sys
 
 # 儲存路徑
 path = "../nnw-unofficial/diary-resource"
@@ -42,6 +43,7 @@ def getDiary(memidx, url, headers, findPre):
         content = content.find_all(class_="panel")
         for i in content:
             getDiary(memidx, "https://www.johnnys-web.com" + i["href"], headers, False)
+            time.sleep(2)
 
     # 下載日記中的圖片
     content = soup.find(class_="entry__body")
@@ -80,16 +82,29 @@ def getDiary(memidx, url, headers, findPre):
     fd.close()
 
 def main():
+    if len(sys.argv) == 1:
+        print("Usage: python jweb_download.py [mem index] [-a]\n-a\tDownload all contain past")
+        exit()
+
+    memidx = int(sys.argv[1])
+    iaAll = False
+    if len(sys.argv) > 2 and argv[2] == "-a":
+        isAll = True
+
     # header 填入自己的 cookie
     userAgent = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Mobile Safari/537.36 Edg/97.0.1072.69"
-    cookies = "S5SI=ivqetbpdepefgtihv0sdp48iurg95ojh; _gid=GA1.2.1358009867.1643553416; _gat_UA-138599890-11=1; 2982884DD3255EBE=93c038c7ec466081b27b1787f6b4d779194d3261; _ga_HSEHV5RVJR=GS1.1.1643553414.1.1.1643553446.0; _ga=GA1.2.1055199818.1643553416"
+    cookies = "S5SI=a4s3b9i2rgoifpa1u1k9j18s9u2vlnb4; _gid=GA1.2.1695904574.1643696367; _gat_UA-138599890-11=1; 2982884DD3255EBE=e4d8b328c86d7e29640eaf111ba94dc5fc5cfde9; _ga=GA1.2.1055199818.1643553416; _ga_HSEHV5RVJR=GS1.1.1643696366.2.1.1643696380.0"
     headers = {'User-Agent': userAgent, 'Cookie': cookies}
 
     # 掃所有成員的所有日記
-    for i in range(1, 8):
-        url = "https://www.johnnys-web.com/s/jwb/diary/766/list?ct=%s" % i
-        getDiary(i, url, headers, True)
-        time.sleep(2)
+    if memidx == 0:
+        for i in range(1, 8):
+            url = "https://www.johnnys-web.com/s/jwb/diary/766/list?ct=%s" % i
+            getDiary(i, url, headers, iaAll)
+            time.sleep(2)
+    else:
+        url = "https://www.johnnys-web.com/s/jwb/diary/766/list?ct=%s" % memidx
+        getDiary(memidx, url, headers, iaAll)
 
 if __name__ == '__main__':
     main()
