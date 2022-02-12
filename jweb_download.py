@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 import urllib.request
 from bs4 import BeautifulSoup
+from fillcontent import*
 import time
 import os
 import sys
@@ -19,6 +20,7 @@ def getHtml(url, headers):
     return html
 
 def getDiary(memidx, url, headers, findPre):
+    dcnt = 0
     # 得到網頁本體
     html = getHtml(url, headers)
     if html == None:
@@ -36,6 +38,7 @@ def getDiary(memidx, url, headers, findPre):
         return
     else:
         print(filename + " downloading!")
+        dcnt += 1
 
     # 找到以前所有 post
     if findPre == True:
@@ -75,11 +78,30 @@ def getDiary(memidx, url, headers, findPre):
         except:
             pass
     html = html.replace("/images/53/287/", "./images/")
+    # 加入網頁
+    n = '../nnw-unofficial/diarya%d.html' % memidx
+    d = open(n, 'r', encoding='utf-8')
+    h = d.read()
+    sd = BeautifulSoup(h, "html.parser")
+    addDiarylist(daystr, sd)
+    d.close()
+    d = open(n, 'w', encoding='utf-8')
+    d.write(sd.prettify(indent_width=4))
+
+    contentFile('../nnw-unofficial/', daystr, memidx, soup)
 
     # 儲存網頁
     fd = open(filename, "w", encoding="UTF-8")
     fd.write(html)
     fd.close()
+
+    # git push
+    if dcnt > 0:
+        os.system('cd ../nnw-unofficial/')
+        os.system('git add .')
+        os.system('git commit -m "daily update"')
+        os.system('git push')
+    
 
 def main():
     if len(sys.argv) == 1:
